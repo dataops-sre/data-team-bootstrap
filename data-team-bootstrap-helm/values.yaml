@@ -1,0 +1,20 @@
+# Default values for kafka-stream-helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+datadog:
+  enabled: false
+
+kafka_control_center:
+  enabled: false
+  image: confluentinc/cp-enterprise-control-center:4.1.0-1
+
+jupyter_notebook:
+  image: jupyter/minimal-notebook:latest
+  enabled: false
+
+kafka_broker:
+  image: confluentinc/cp-enterprise-kafka:4.1.0-1
+kafka_schema_registry:
+  image: confluentinc/cp-schema-registry:4.1.0-1
+kafka_zookeeper:
+  image: confluentinc/cp-zookeeper:4.1.0-1

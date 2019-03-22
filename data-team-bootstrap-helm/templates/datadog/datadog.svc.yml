@@ -1,0 +1,14 @@
+{{- if and (.Values.datadog.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: datadogstatsd
+spec:
+  selector:
+    name: datadog-agent
+  type: ClusterIP
+  ports:
+  - port: 8125
+    protocol: UDP
+    targetPort: 8125
+{{- end }}

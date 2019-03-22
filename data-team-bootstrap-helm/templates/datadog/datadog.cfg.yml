@@ -1,0 +1,11 @@
+{{- if and (.Values.datadog.enabled) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datadog-config
+data:
+  probe.sh: |-
+{{ tpl (.Files.Get "monitoring/probe.sh") . | printf "%s" | indent 4}}
+  container_memory_check.py: |-
+{{ tpl (.Files.Get "monitoring/container_memory_check.py") . | printf "%s" | indent 4}}
+{{- end }}

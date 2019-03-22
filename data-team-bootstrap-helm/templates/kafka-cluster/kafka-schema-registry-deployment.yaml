@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-schema-registry
+  name: kafka-schema-registry
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: kafka-schema-registry
+    spec:
+      containers:
+      - env:
+        - name: SCHEMA_REGISTRY_HOST_NAME
+          value: kafka-schema-registry
+        - name: SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL
+          value: zookeeper:2181
+        image: {{ .Values.kafka_schema_registry.image }}
+        name: kafka-schema-registry
+        ports:
+        - containerPort: 8081
+        resources: {}
+      hostname: kafka-schema-registry
+      restartPolicy: Always
+status: {}

@@ -1,0 +1,118 @@
+{{- if and (.Values.datadog.enabled) }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: datadog-agent
+  annotations:
+    ad.datadoghq.com/datadog-agent.logs: '[{"source":"datadog","service":"datadog-agent"}]'
+  labels:
+    app: datadog-agent
+spec:
+  selector:
+    matchLabels:
+      name: datadog-agent
+  updateStrategy:
+      type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: datadog-agent
+    spec:
+      containers:
+      - image: datadog/agent:latest-jmx
+        imagePullPolicy: Always
+        name: datadog-agent
+        ports:
+          - containerPort: 8125
+            # hostPort: 8125
+            name: dogstatsdport
+            protocol: UDP
+          - containerPort: 8126
+            # hostPort: 8126
+            name: traceport
+            protocol: TCP
+        env:
+          - name: DD_API_KEY
+            value: '**************************'
+          - name: DD_COLLECT_KUBERNETES_EVENTS
+            value: "true"
+          - name: DD_HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: DD_LEADER_ELECTION
+            value: "true"
+          - name: KUBERNETES
+            value: "true"
+          - name: DD_DOGSTATSD_NON_LOCAL_TRAFFIC
+            value: "true"
+          - name: DD_KUBERNETES_KUBELET_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: DD_PROCESS_AGENT_ENABLED
+            value: "true"
+          - name: DD_LOGS_ENABLED
+            value: "true"
+          - name: SD_JMX_ENABLE
+            value: "true"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
+        volumeMounts:
+          - name: dockersocket
+            mountPath: /var/run/docker.sock
+          - name: procdir
+            mountPath: /host/proc
+            readOnly: true
+          - name: cgroups
+            mountPath: /host/sys/fs/cgroup
+            readOnly: true
+          - name: logsdir
+            mountPath: /opt/datadog-agent/run
+            readOnly: false
+          - name: "datadog-config"
+            mountPath: "/container_memory_check.py"
+            subPath: "container_memory_check.py"
+          - name: "datadog-config"
+            mountPath: "/probe.sh"
+            subPath: "probe.sh"
+# Required to display usernames works more or less OK without it, as everything runs as root...
+#          - name: passwd
+#            mountPath: /etc/passwd
+#            readOnly: true
+        livenessProbe:
+          exec:
+            command:
+            - ./probe.sh
+          initialDelaySeconds: 15
+          periodSeconds: 5
+      volumes:
+        - hostPath:
+            path: /var/run/docker.sock
+          name: dockersocket
+        - hostPath:
+            path: /proc
+          name: procdir
+        - hostPath:
+            path: /sys/fs/cgroup
+          name: cgroups
+        - hostPath:
+            path: /opt/datadog-agent/run
+          name: logsdir
+        - name: "datadog-config"
+          configMap:
+            name: "datadog-config"
+            defaultMode: 0744
+# Required to display usernames works more or less OK without it, as everything runs as root...
+#        - hostPath:
+#            path: /etc/passwd
+#          name: passwd
+      tolerations:
+        - operator: "Exists"
+          effect: "NoSchedule"
+{{- end }}

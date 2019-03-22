@@ -1,0 +1,6 @@
+datadog:
+  enabled: true
+jupyter_notebook:
+  enabled: true
+kafka_control_center:
+  enabled: false

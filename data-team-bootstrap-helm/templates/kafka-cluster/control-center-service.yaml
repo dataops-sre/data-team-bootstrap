@@ -1,0 +1,20 @@
+{{- if and (.Values.kafka_control_center.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: control-center
+    expose: http
+    access: public
+    flix/firewall: office
+  name: control-center
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    protocol: TCP
+    targetPort: 9021
+    port: 80
+  selector:
+    app: control-center
+{{- end }}

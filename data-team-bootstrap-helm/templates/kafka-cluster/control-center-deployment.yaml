@@ -1,0 +1,39 @@
+{{- if and (.Values.kafka_control_center.enabled) }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: control-center
+  name: control-center
+spec:
+  template:
+    metadata:
+      labels:
+        app: control-center
+    spec:
+      containers:
+      - env:
+        - name: CONFLUENT_METRICS_TOPIC_REPLICATION
+          value: "1"
+        - name: CONTROL_CENTER_BOOTSTRAP_SERVERS
+          value: broker:9092
+        - name: CONTROL_CENTER_CONNECT_CLUSTER
+          value: connect:8083
+        - name: CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS
+          value: "1"
+        - name: CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS
+          value: "1"
+        - name: CONTROL_CENTER_REPLICATION_FACTOR
+          value: "1"
+        - name: CONTROL_CENTER_ZOOKEEPER_CONNECT
+          value: zookeeper:2181
+        - name: PORT
+          value: "9021"
+        image: {{ .Values.kafka_control_center.image }}
+        name: control-center
+        ports:
+        - containerPort: 9021
+          name: http
+      restartPolicy: Always
+status: {}
+{{- end }}
