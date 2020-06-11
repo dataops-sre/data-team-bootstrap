@@ -1,6 +1,7 @@
 datadog:
-  enabled: true
+  enabled: false
+  API_KEY: xxxxxxxxxxxxxxxxxxx
 jupyter_notebook:
-  enabled: true
+  enabled: false
 kafka_control_center:
   enabled: false

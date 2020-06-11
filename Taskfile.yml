@@ -1,0 +1,51 @@
+# https://taskfile.dev
+
+version: '2'
+env:
+  PROJECT_NAME: data-team-bootstrap
+  ENV: '{{default "minikube" .ENV}}'
+  NAMESPACE: '{{default "default" .NAMESPACE}}'
+vars:
+  KUBE_CONTEXT: '{{default "minikube" .KUBE_CONTEXT}}'
+
+tasks:
+
+  run.local:
+    cmds:
+      - >
+        task start.minikube;
+        eval $(minikube docker-env);
+        task deploy;
+
+  start.minikube:
+    cmds:
+      - if minikube status | grep Running; then echo "minikube running..."; else echo "starting minikube"; minikube start; fi
+
+  default:
+    cmds:
+      - echo 'executed on {{if ne .KUBE_CONTEXT "minikube"}}remote{{else}}local{{end}}'
+    silent: true
+
+  deploy:
+    deps: [set.k8s.context]
+    cmds:
+      - >
+        helm upgrade $PROJECT_NAME $PROJECT_NAME-helm \
+          --namespace $NAMESPACE \
+          --install \
+          --atomic \
+          --cleanup-on-fail \
+          --force \
+          --wait \
+          --timeout 600s \
+          --values helm-values/$PROJECT_NAME-helm-values/values-$ENV.yaml
+
+  undeploy:
+    deps: [set.k8s.context]
+    cmds:
+      - helm uninstall --namespace $NAMESPACE $PROJECT_NAME
+
+  set.k8s.context:
+    cmds:
+      - kubectl config set-context {{.KUBE_CONTEXT}} --namespace=$NAMESPACE
+      - kubectl config use-context {{.KUBE_CONTEXT}} --namespace=$NAMESPACE

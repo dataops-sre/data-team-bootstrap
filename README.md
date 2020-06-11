@@ -13,76 +13,42 @@ it contains following components:
 ## Pré-requis
 You need following components:
 
-- Minikube
-- Make
-- Helm + Tillerless plugin
-
-Install upon packages with your prefer package manager, to install helm Tillerless plugin:
-```bash
-helm init --client-only \
-helm plugin install https://github.com/rimusz/helm-tiller \
-helm plugin update tiller
-```
+- Taskfile
+- Helm3
 
 ## Quick starts
 Simple run :
-``` make deploy ```
+``` task run.local ```
 ```bash
-zhaolong@Odyssus ~/workspace/data-team-bootstrap % make deploy
+zhaolong@Odyssus ~/workspace/data-team-bootstrap (git)-[master] % task run.local             
+task start.minikube; eval $(minikube docker-env); task deploy;
+
+if minikube status | grep Running; then echo "minikube running..."; else echo "starting minikube"; minikube start; fi
+host: Running
+kubelet: Running
+apiserver: Running
+minikube running...
+kubectl config set-context minikube --namespace=$NAMESPACE
+Context "minikube" modified.
+kubectl config use-context minikube --namespace=$NAMESPACE
 Switched to context "minikube".
-Makefile:12: avertissement : variable « NAMESPACE » indéfinie
-for service in data-team-bootstrap; do \
-        helm tiller run  -- helm upgrade --install --wait "$service" data-team-bootstrap-helm --values ./helm-values/$service-helm-values/values-local.yaml
-done
-Installed Helm version v2.12.3
-Installed Tiller version v2.12.3
-Helm and Tiller are the same version!
-Starting Tiller...
-Tiller namespace: kube-system
-Running: helm upgrade --install --wait data-team-bootstrap data-team-bootstrap-helm --values ./helm-values/data-team-bootstrap-helm-values/values-local.yaml
+helm upgrade $PROJECT_NAME $PROJECT_NAME-helm \
+  --namespace $NAMESPACE \
+  --install \
+  --atomic \
+  --cleanup-on-fail \
+  --force \
+  --wait \
+  --timeout 600s \
+  --values helm-values/$PROJECT_NAME-helm-values/values-$ENV.yaml
 
-Release "data-team-bootstrap" has been upgraded. Happy Helming!
-LAST DEPLOYED: Thu Feb 28 13:31:18 2019
+Release "data-team-bootstrap" does not exist. Installing it now.
+NAME: data-team-bootstrap
+LAST DEPLOYED: Thu Jun 11 09:32:16 2020
 NAMESPACE: default
-STATUS: DEPLOYED
-
-RESOURCES:
-==> v1beta1/Deployment
-NAME                   DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
-broker                 1        1        1           1          4m53s
-kafka-schema-registry  1        1        1           1          4m53s
-zookeeper              1        1        1           1          4m53s
-
-==> v1/Pod(related)
-NAME                                    READY  STATUS   RESTARTS  AGE
-datadog-agent-bgs2v                     1/1    Running  0         4m53s
-jupyter-notebook-7d9bd49b87-8rjzd       1/1    Running  0         98s
-broker-6679944c58-p2vv2                 1/1    Running  0         4m53s
-kafka-schema-registry-6659797cc5-f9ntr  1/1    Running  0         4m53s
-zookeeper-5d5cb47745-jcwgz              1/1    Running  0         4m53s
-
-==> v1/ConfigMap
-NAME            DATA  AGE
-datadog-config  2     4m53s
-
-==> v1/Service
-NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP  PORT(S)                        AGE
-datadogstatsd          ClusterIP  10.107.69.107   <none>       8125/UDP                       4m53s
-jupyter-notebook       NodePort   10.109.171.163  <none>       8888:30040/TCP                 98s
-broker                 NodePort   10.110.233.63   <none>       9092:30537/TCP,9999:30727/TCP  4m53s
-kafka-schema-registry  ClusterIP  10.111.130.26   <none>       8081/TCP                       4m53s
-zookeeper              ClusterIP  10.103.7.91     <none>       2181/TCP                       4m53s
-
-==> v1beta1/DaemonSet
-NAME           DESIRED  CURRENT  READY  UP-TO-DATE  AVAILABLE  NODE SELECTOR  AGE
-datadog-agent  1        1        1      1           1          <none>         4m53s
-
-==> v1/Deployment
-NAME              DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
-jupyter-notebook  1        1        1           1          98s
-
-
-Stopping Tiller...
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
 ```
 Here is a table to list how to access to bootstrapped services:
 

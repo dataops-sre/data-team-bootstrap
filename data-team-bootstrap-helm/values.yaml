@@ -1,8 +1,6 @@
-# Default values for kafka-stream-helm.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 datadog:
   enabled: false
+  API_KEY: xxxxxxxxxxxxxxxxxxx
 
 kafka_control_center:
   enabled: false

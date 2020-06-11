@@ -33,7 +33,7 @@ spec:
             protocol: TCP
         env:
           - name: DD_API_KEY
-            value: '**************************'
+            value: {{ .Values.datadog.API_KEY }}
           - name: DD_COLLECT_KUBERNETES_EVENTS
             value: "true"
           - name: DD_HOSTNAME
